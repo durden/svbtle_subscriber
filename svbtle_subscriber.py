@@ -63,15 +63,15 @@ def _dump_results(writers):
                               writer['rss'])
 
 
-def _get_greader_subscription_feed_urls():
+def _get_greader_subscription_feed_urls(xml_file):
     """Get a list of feed urls from your greader account"""
 
     # This is the url for the web, but just for testing we are using a xml file
     # locally since authentication is a pain.  Once in a browser it will be
     # completely separate from this app for simplicity.
+    # http://www.google.com/reader/api/0/subscription/list
 
-    #http://www.google.com/reader/api/0/subscription/list
-    soup = BeautifulStoneSoup(open('sample_subscriptions.xml').read())
+    soup = BeautifulStoneSoup(open(xml_file).read())
 
     feeds = []
     xml_soup = soup.findAll('string', {'name': 'id'})
@@ -115,23 +115,41 @@ def _diff_subscriptions(existing_feed_urls, new_feed_urls):
     return missing_feeds
 
 
+def _parse_args():
+    import argparse
+
+    desc='See what writers on svbtle.com you aren\'t subscribed to'
+    parser = argparse.ArgumentParser(prog='svbtle_subscriber.py',
+                                     description=desc)
+
+    parser.add_argument('-v', '--verbose', action='store_true', required=False,
+                        default=False, help='Verbose output')
+
+    parser.add_argument('-x', '--greader_xml', action='store', required=False,
+                        default=None,
+                        help='XML file of Google reader subscriptions')
+
+    args = parser.parse_args()
+    return (args.verbose, args.greader_xml)
+
+
 def main():
-    import sys
+    import os
+
+    verbose, reader_xml = _parse_args()
 
     writers = _get_writers_and_homepage()
-
-    verbose = '-v' in sys.argv
 
     svbtle_feed_urls = []
     for writer in writers:
         writer['rss'] = _get_writer_rss_address(writer['homepage'], verbose)
         svbtle_feed_urls.append(writer['rss'])
 
-    greader_feed_urls = _get_greader_subscription_feed_urls()
-
-    print _diff_subscriptions(greader_feed_urls, svbtle_feed_urls)
-
     _dump_results(writers)
+
+    if reader_xml and os.path.isfile(reader_xml):
+        greader_feed_urls = _get_greader_subscription_feed_urls(reader_xml)
+        print _diff_subscriptions(greader_feed_urls, svbtle_feed_urls)
 
 
 if __name__ == "__main__":
