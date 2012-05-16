@@ -8,7 +8,7 @@ feed.
 import re
 
 import requests
-from BeautifulSoup import BeautifulSoup
+from BeautifulSoup import BeautifulSoup, BeautifulStoneSoup
 
 
 def _get_writers_and_homepage():
@@ -61,6 +61,25 @@ def _dump_results(writers):
     for writer in writers:
         print '%s, %s, %s' % (writer['name'], writer['homepage'],
                               writer['rss'])
+
+
+def _get_greader_subscription_feed_urls():
+    """Get a list of feed urls from your greader account"""
+
+    # This is the url for the web, but just for testing we are using a xml file
+    # locally since authentication is a pain.  Once in a browser it will be
+    # completely separate from this app for simplicity.
+
+    #http://www.google.com/reader/api/0/subscription/list
+    soup = BeautifulStoneSoup(open('sample_subscriptions.xml').read())
+
+    feeds = []
+    xml_soup = soup.findAll('string', {'name': 'id'})
+
+    for feed in xml_soup:
+        feeds.append(re.sub(r'^feed', '', feed.text))
+
+    return feeds
 
 
 def main():
