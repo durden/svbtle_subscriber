@@ -94,7 +94,6 @@ def _diff_subscriptions(existing_feed_urls, new_feed_urls):
 
     missing_feeds = []
 
-    import pdb;pdb.set_trace()
     for feed in new_feed_urls:
         # Feeds might have .rss or not in them, so check for both (we could use
         # set operations if it wasn't for this weirdness)
@@ -132,7 +131,7 @@ def main():
 
     print _diff_subscriptions(greader_feed_urls, svbtle_feed_urls)
 
-    #_dump_results(writers)
+    _dump_results(writers)
 
 
 if __name__ == "__main__":
