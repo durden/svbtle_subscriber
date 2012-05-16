@@ -77,9 +77,43 @@ def _get_greader_subscription_feed_urls():
     xml_soup = soup.findAll('string', {'name': 'id'})
 
     for feed in xml_soup:
-        feeds.append(re.sub(r'^feed', '', feed.text))
+        # text starts with feed/ for some reason
+        url = re.sub(r'^feed/', '', feed.text)
+
+        if re.search(r'^http://', url):
+            feeds.append(url)
 
     return feeds
+
+
+def _diff_subscriptions(existing_feed_urls, new_feed_urls):
+    """
+    Diff two feed lists and return what feeds from new_feed_urls that aren't
+    already in existing_feed_urls
+    """
+
+    missing_feeds = []
+
+    import pdb;pdb.set_trace()
+    for feed in new_feed_urls:
+        # Feeds might have .rss or not in them, so check for both (we could use
+        # set operations if it wasn't for this weirdness)
+        possible_urls = [feed]
+        if re.search(r'\.rss$', feed):
+            possible_urls.append(feed.split('.rss')[0])
+        else:
+            possible_urls.append('%s.rss' % (feed))
+
+        found = False
+        for url in possible_urls:
+            if url in existing_feed_urls:
+                found = True
+                break
+
+        if not found:
+            missing_feeds.append(feed)
+
+    return missing_feeds
 
 
 def main():
@@ -89,10 +123,16 @@ def main():
 
     verbose = '-v' in sys.argv
 
+    svbtle_feed_urls = []
     for writer in writers:
         writer['rss'] = _get_writer_rss_address(writer['homepage'], verbose)
+        svbtle_feed_urls.append(writer['rss'])
 
-    _dump_results(writers)
+    greader_feed_urls = _get_greader_subscription_feed_urls()
+
+    print _diff_subscriptions(greader_feed_urls, svbtle_feed_urls)
+
+    #_dump_results(writers)
 
 
 if __name__ == "__main__":
