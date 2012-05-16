@@ -1,2 +1,3 @@
-requests
-BeautifulSoup
+BeautifulSoup==3.2.1
+feedparser==5.1.2
+requests==0.12.1
