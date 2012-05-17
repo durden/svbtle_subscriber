@@ -203,7 +203,7 @@ def run_web():
         """Show missing author subscriptions based on uploaded file"""
 
         missing_authors = []
-        file_obj = request.files['file']
+        file_obj = request.files['reader_xml']
 
         if file_obj and allowed_file(file_obj.filename):
             filename = secure_filename(file_obj.filename)
@@ -216,8 +216,10 @@ def run_web():
             if greader_feed_urls:
                 missing_authors = _diff_subscriptions(greader_feed_urls,
                                                       writers)
+                os.remove(xml)
 
-        return render_template('subscriptions.html', writers=missing_authors)
+        return render_template('subscriptions.html', writers=missing_authors,
+                               heading='Missing Svbtle Authors')
 
     app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
     app.config['MAX_CONTENT_LENGTH'] = 1 * 1024 * 1024
