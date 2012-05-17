@@ -63,7 +63,7 @@ def _dump_results(writers):
                               writer['rss'])
 
 
-def _get_greader_subscription_feed_urls(xml_file):
+def _get_greader_subscription_urls(xml_file):
     """Get a list of feed urls from your greader account"""
 
     # This is the url for the web, but just for testing we are using a xml file
@@ -116,9 +116,11 @@ def _diff_subscriptions(existing_feed_urls, new_feed_urls):
 
 
 def _parse_args():
+    """Parse arguments and return tuple of parsed contents"""
+
     import argparse
 
-    desc='See what writers on svbtle.com you aren\'t subscribed to'
+    desc = 'See what writers on svbtle.com you aren\'t subscribed to'
     parser = argparse.ArgumentParser(prog='svbtle_subscriber.py',
                                      description=desc)
 
@@ -129,14 +131,36 @@ def _parse_args():
                         default=None,
                         help='XML file of Google reader subscriptions')
 
+    parser.add_argument('-w', '--web', action='store_true', required=False,
+                        default=False, help='Run web interface')
+
     args = parser.parse_args()
-    return (args.verbose, args.greader_xml)
+    return (args.verbose, args.greader_xml, args.web)
+
+
+def run_web():
+    """Run web interface"""
+
+    from flask import Flask
+    app = Flask(__name__)
+
+    @app.route('/')
+    def hello_world():
+        return 'Hello World!'
+
+    app.run()
 
 
 def main():
+    """Start"""
+
     import os
 
-    verbose, reader_xml = _parse_args()
+    verbose, reader_xml, web = _parse_args()
+
+    if web:
+        run_web()
+        return
 
     writers = _get_writers_and_homepage()
 
@@ -148,7 +172,7 @@ def main():
     _dump_results(writers)
 
     if reader_xml and os.path.isfile(reader_xml):
-        greader_feed_urls = _get_greader_subscription_feed_urls(reader_xml)
+        greader_feed_urls = _get_greader_subscription_urls(reader_xml)
         print _diff_subscriptions(greader_feed_urls, svbtle_feed_urls)
 
 
