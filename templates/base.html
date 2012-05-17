@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Svbtle Subscriber - Don't miss good content</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/bootstrap.css') }}">
+        <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/style.css') }}">
+    </head>
+    <body>
+        <div class="container">
+            {% block content %} {% endblock %}
+        </div>
+    </body>
+</html>
