@@ -5,6 +5,7 @@ Module to scrape svbtle.com for all authors and get the address to their RSS
 feed.
 """
 
+import os
 import re
 
 import requests
@@ -56,18 +57,12 @@ def _get_writer_rss_address(url, verbose=True):
 
 
 def _get_greader_subscription_urls(xml=None):
-    """
-    Get a list of feed urls from your greader account
+    """Get a list of feed urls from your greader account based on xml file"""
 
-    xml can be an xml file object or string of xml data
-    """
-
-    if isinstance(xml, str):
-        soup = BeautifulStoneSoup(xml)
-    elif isinstance(xml, file):
+    if os.path.isfile(xml):
         soup = BeautifulStoneSoup(open(xml).read())
     else:
-        raise TypeError('xml must be string or file object')
+        raise TypeError('xml argument is not a file')
 
     feeds = []
     xml_soup = soup.findAll('string', {'name': 'id'})
@@ -150,8 +145,7 @@ def _get_writers(verbose):
     """
 
     writers = _get_writers_and_homepage()
-    return writers
-    #return _get_writer_rss_addresses(writers, verbose)
+    return _get_writer_rss_addresses(writers, verbose)
 
 
 def _parse_args():
@@ -180,7 +174,6 @@ def _parse_args():
 def run_web():
     """Run web interface"""
 
-    import os
     from flask import Flask, request, render_template
     from werkzeug import secure_filename
 
@@ -223,8 +216,6 @@ def run_web():
 def main():
     """Start"""
 
-    import os
-
     verbose, reader_xml, web = _parse_args()
 
     if web:
@@ -237,12 +228,13 @@ def main():
     if reader_xml and os.path.isfile(reader_xml):
         missing_authors = []
 
-        greader_feed_urls = _get_greader_subscription_urls(xml_file=reader_xml)
+        greader_feed_urls = _get_greader_subscription_urls(xml=reader_xml)
         if greader_feed_urls:
             missing_authors = _diff_subscriptions(greader_feed_urls, writers)
 
         print '--- Missing authors ---'
         _dump_results(missing_authors)
+
 
 if __name__ == "__main__":
     main()
