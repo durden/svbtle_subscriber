@@ -11,8 +11,10 @@ import re
 import requests
 from BeautifulSoup import BeautifulSoup, BeautifulStoneSoup
 
+import app
 
-def _get_writers_and_homepage():
+
+def get_writers_and_homepage():
     """Get a list of dicts containing writer name and homepage addresses"""
 
     html = requests.get('http://svbtle.com/')
@@ -39,7 +41,7 @@ def _get_writers_and_homepage():
     return writers
 
 
-def _get_writer_rss_address(url, verbose=True):
+def get_writer_rss_address(url, verbose=True):
     """Scrape given url for a feed address and return it"""
 
     if verbose:
@@ -56,7 +58,7 @@ def _get_writer_rss_address(url, verbose=True):
     return rss
 
 
-def _get_greader_subscription_urls(xml=None):
+def get_greader_subscription_urls(xml=None):
     """Get a list of feed urls from your greader account based on xml file"""
 
     if os.path.isfile(xml):
@@ -77,7 +79,7 @@ def _get_greader_subscription_urls(xml=None):
     return feeds
 
 
-def _diff_subscriptions(existing_feed_urls, svbtle_authors):
+def diff_subscriptions(existing_feed_urls, svbtle_authors):
     """
     Diff two feed lists and return what feeds from svbtle_authors that aren't
     already in existing_feed_urls
@@ -120,7 +122,7 @@ def _dump_results(writers):
                               writer['rss'])
 
 
-def _get_writer_rss_addresses(writers, verbose):
+def get_writer_rss_addresses(writers, verbose):
     """
     Fill in rss urls for given writers
 
@@ -132,20 +134,20 @@ def _get_writer_rss_addresses(writers, verbose):
 
         # FIXME: Could cache/db the list of authors and only do this request if
         # we have added one.  This will reduce all most all the work.
-        writer['rss'] = _get_writer_rss_address(writer['homepage'], verbose)
+        writer['rss'] = get_writer_rss_address(writer['homepage'], verbose)
 
     return writers
 
 
-def _get_writers(verbose):
+def get_writers(verbose):
     """
     Get all available writers with their info
 
     Returns list of dictionaries with keys: 'name', 'homepage', 'rss'
     """
 
-    writers = _get_writers_and_homepage()
-    return _get_writer_rss_addresses(writers, verbose)
+    writers = get_writers_and_homepage()
+    return get_writer_rss_addresses(writers, verbose)
 
 
 def _parse_args():
@@ -171,80 +173,24 @@ def _parse_args():
     return (args.verbose, args.greader_xml, args.web)
 
 
-def run_web(host, port):
-    """Run web interface"""
-
-    from flask import Flask, request, render_template
-    from werkzeug import secure_filename
-
-    app = Flask(__name__)
-    app.debug = True
-
-    def allowed_file(filename):
-        """Return True if file has allowed extension (xml only)"""
-
-        return '.' in filename and  filename.rsplit('.', 1)[1] in set(['xml'])
-
-    @app.route('/')
-    def home():
-        """homepage"""
-
-        return render_template('index.html')
-
-    @app.route('/all_available')
-    def available():
-        """Show all available writers on svbtle.com"""
-
-        writers = _get_writers(False)
-        return render_template('subscriptions.html', writers=writers)
-
-    @app.route('/missing_subscriptions', methods=['POST'])
-    def missing():
-        """Show missing author subscriptions based on uploaded file"""
-
-        missing_authors = []
-        file_obj = request.files['reader_xml']
-
-        if file_obj and allowed_file(file_obj.filename):
-            filename = secure_filename(file_obj.filename)
-            xml = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file_obj.save(xml)
-
-            writers = _get_writers(False)
-
-            greader_feed_urls = _get_greader_subscription_urls(xml)
-            if greader_feed_urls:
-                missing_authors = _diff_subscriptions(greader_feed_urls,
-                                                      writers)
-                os.remove(xml)
-
-        return render_template('subscriptions.html', writers=missing_authors,
-                               heading='Missing Svbtle Authors')
-
-    app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
-    app.config['MAX_CONTENT_LENGTH'] = 1 * 1024 * 1024
-
-    app.run(host=host, port=port)
-
-
 def main():
     """Start"""
 
     verbose, reader_xml, web = _parse_args()
 
     if web:
-        run_web('127.0.0.1', 5000)
+        app.run_web('127.0.0.1', 5000)
         return
 
-    writers = _get_writers(verbose)
+    writers = get_writers(verbose)
     _dump_results(writers)
 
     if reader_xml and os.path.isfile(reader_xml):
         missing_authors = []
 
-        greader_feed_urls = _get_greader_subscription_urls(xml=reader_xml)
+        greader_feed_urls = get_greader_subscription_urls(xml=reader_xml)
         if greader_feed_urls:
-            missing_authors = _diff_subscriptions(greader_feed_urls, writers)
+            missing_authors = diff_subscriptions(greader_feed_urls, writers)
 
         print '--- Missing authors ---'
         _dump_results(missing_authors)
