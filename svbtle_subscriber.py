@@ -6,6 +6,7 @@ feed.
 """
 
 import os
+import cStringIO
 import re
 
 import requests
@@ -61,10 +62,12 @@ def get_writer_rss_address(url, verbose=True):
 def get_greader_subscription_urls(xml=None):
     """Get a list of feed urls from your greader account based on xml file"""
 
-    if os.path.isfile(xml):
+    if isinstance(xml, cStringIO.StringIO):
+        soup = BeautifulStoneSoup(xml.read())
+    elif os.path.isfile(xml):
         soup = BeautifulStoneSoup(open(xml).read())
     else:
-        raise TypeError('xml argument is not a file')
+        raise TypeError('xml argument is not a file or cStringIO')
 
     feeds = []
     xml_soup = soup.findAll('string', {'name': 'id'})

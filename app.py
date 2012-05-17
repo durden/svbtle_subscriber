@@ -4,13 +4,11 @@ Little wrapper to kick off web interface
 
 import os
 import svbtle_subscriber as subscriber
+from flask import Flask, request, render_template
 
 
 def run_web(host, port):
     """Run web interface"""
-
-    from flask import Flask, request, render_template
-    from werkzeug import secure_filename
 
     app = Flask(__name__)
     app.debug = True
@@ -41,18 +39,14 @@ def run_web(host, port):
         file_obj = request.files['reader_xml']
 
         if file_obj and allowed_file(file_obj.filename):
-            filename = secure_filename(file_obj.filename)
-            xml = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file_obj.save(xml)
-
             writers = subscriber.get_writers(False)
 
-            greader_feed_urls = subscriber.get_greader_subscription_urls(xml)
+            greader_feed_urls = subscriber.get_greader_subscription_urls(
+                                                                    file_obj)
             if greader_feed_urls:
                 missing_authors = subscriber.diff_subscriptions(
                                                             greader_feed_urls,
                                                             writers)
-                os.remove(xml)
 
         return render_template('subscriptions.html', writers=missing_authors,
                                heading='Missing Svbtle Authors')
