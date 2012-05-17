@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>{{ heading|default('Svbtle Bloggers') }}</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Homepage</th>
+            <th>Feed</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for writer in writers %}
+            <tr>
+                <td>{{ writer.name }}</td>
+                <td><a href="{{ writer.homepage }}">{{ writer.homepage }}</a></td>
+                <td><a href="{{ writer.rss }}">{{ writer.rss }}</a></td>
+            </tr>
+        {% else %}
+            <p>
+                No subscriptions found. Are you sure your logged into your
+                <a href="http://reader.google.com">Google Reader</a> account?
+            </p>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
