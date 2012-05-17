@@ -171,7 +171,7 @@ def _parse_args():
     return (args.verbose, args.greader_xml, args.web)
 
 
-def run_web():
+def run_web(host, port):
     """Run web interface"""
 
     from flask import Flask, request, render_template
@@ -224,7 +224,7 @@ def run_web():
     app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
     app.config['MAX_CONTENT_LENGTH'] = 1 * 1024 * 1024
 
-    app.run()
+    app.run(host=host, port=port)
 
 
 def main():
@@ -233,7 +233,7 @@ def main():
     verbose, reader_xml, web = _parse_args()
 
     if web:
-        run_web()
+        run_web('127.0.0.1', 5000)
         return
 
     writers = _get_writers(verbose)
