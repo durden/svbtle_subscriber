@@ -31,7 +31,7 @@ def home():
     return render_template('index.html')
 
 
-@app.route('/all_available')
+@app.route('/all')
 def available():
     """Show all available writers on svbtle.com"""
 
