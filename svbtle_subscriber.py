@@ -178,7 +178,7 @@ def run_web():
     from werkzeug import secure_filename
 
     app = Flask(__name__)
-    app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
+    app.debug = True
 
     def allowed_file(filename):
         """Return True if file has allowed extension (xml only)"""
@@ -208,6 +208,7 @@ def run_web():
         if file_obj and allowed_file(file_obj.filename):
             filename = secure_filename(file_obj.filename)
             xml = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file_obj.save(xml)
 
             writers = _get_writers(False)
 
@@ -217,6 +218,9 @@ def run_web():
                                                       writers)
 
         return render_template('subscriptions.html', writers=missing_authors)
+
+    app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
+    app.config['MAX_CONTENT_LENGTH'] = 1 * 1024 * 1024
 
     app.run()
 
