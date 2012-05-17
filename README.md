@@ -39,13 +39,14 @@ requirements.txt.
 
         - pip install .
 
-        If you don't install the module with the above 'pip install' line then
-        you will have to make the script executable or run it with python
-        directly such as:
+####Usage
 
-            - python svbtle_subscriber.py
+**If you didn't install the module with the above 'pip install' line then you
+will have to make the script executable or run it with python directly such
+as:**
 
-##Usage
+    - python svbtle_subscriber.py
+
 
 1. svbtle_subscriber.py
 
@@ -58,16 +59,16 @@ requirements.txt.
     This will show you who you aren't following yet from all the current
     bloggers on [svbtle.com](http://svbtle.com).
 
-    You can get an xml file for your subscriptions in [Google
-    Reader](http://reader.google.com) by going
-    [here](http://www.google.com/reader/api/0/subscription/list) as saving it as
-    file from your browsers 'save as' option.
+    You can get an xml file for your subscriptions in
+    [Google Reader](http://reader.google.com) by going
+    [here](http://www.google.com/reader/api/0/subscription/list) as saving it
+    as file from your browsers 'save as' option.
 
 3. svbtle_subscriber.py --web
 
     - Browse to 127.0.0.1
 
-####Future
+#####Future
 
 - Error handling (too big of file, not xml file, unparseable, etc.)
 - Add subscribe link to missing
