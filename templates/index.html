@@ -24,25 +24,34 @@
     </p>
 
     <h2>So, what great content your missing today?</h2>
-
-    <form class="form-horizontal" action="#" id="form">
+    <form class="form-horizontal" method="post" action="/missing_subscriptions" enctype="multipart/form-data">
         <fieldset>
-            <button type="submit" class="btn btn-large btn-primary">Show me</button>
+            <ol>
+                <li>Login to <a href="http://reader.google.com">Google Reader</a></li>
+                <li>View <a href="http://www.google.com/reader/api/0/subscription/list">Your subscriptions</a></li>
+                <li>
+                    Save <a href="http://www.google.com/reader/api/0/subscription/list">Your subscriptions</a>
+                    with browser 'Save as' functionality
+                </li>
+                <li>Upload your subscriptions</li>
+            </ol>
+            <input class="input-file" id="fileInput" name="reader_xml" type="file">
+            <div class="form-actions">
+                <button type="submit" class="btn btn-large btn-primary">Show me</button>
+            </div>
         </fieldset>
     </form>
     <div class="footer">
-        <p>
-            <small>
-                Created with coffee and rock-n-roll music by
-                <a href="http://twitter.com/durden20">durden</a>.
-                To contribute
-                <a href="http://github.com/durden/svbtle_subscriber">fork it</a>.
-                <br/>
-                This project is not sponsored or affiliated in anyway
-                with <a href="http://svbtle.com">svbtle.com</a>.
-            </small>
-        </p>
-    </div>
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script type="text/javascript" src="/static/js/submit.js"></script>
+            <p>
+                <small>
+                    Created with coffee and rock-n-roll music by
+                    <a href="http://twitter.com/durden20">durden</a>.
+                    To contribute
+                    <a href="http://github.com/durden/svbtle_subscriber">fork it</a>.
+                    <br/>
+                    This project is not sponsored or affiliated in anyway
+                    with <a href="http://svbtle.com">svbtle.com</a>.
+                </small>
+            </p>
+        </div>
 {% endblock %}

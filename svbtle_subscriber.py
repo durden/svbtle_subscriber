@@ -180,9 +180,15 @@ def _parse_args():
 def run_web():
     """Run web interface"""
 
+    import os
     from flask import Flask, request, render_template
+    from werkzeug import secure_filename
 
     app = Flask(__name__)
+    app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
+
+    def allowed_file(filename):
+        return '.' in filename and  filename.rsplit('.', 1)[1] in set(['xml'])
 
     @app.route('/')
     def home():
@@ -195,13 +201,19 @@ def run_web():
 
     @app.route('/missing_subscriptions', methods=['POST'])
     def missing():
-        writers = _get_writers(False)
         missing_authors = []
+        file = request.files['file']
 
-        greader_feed_urls = _get_greader_subscription_urls(
-                                                    request.form['reader_url'])
-        if greader_feed_urls:
-            missing_authors = _diff_subscriptions(greader_feed_urls, writers)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            xml = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+            writers = _get_writers(False)
+
+            greader_feed_urls = _get_greader_subscription_urls(xml)
+            if greader_feed_urls:
+                missing_authors = _diff_subscriptions(greader_feed_urls,
+                                                      writers)
 
         return render_template('subscriptions.html', writers=missing_authors)
 
