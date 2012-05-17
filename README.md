@@ -30,6 +30,11 @@ run 'make all' to install it all.
         - pip install -r web_requirements.txt OR make web
         - make all
 
+** Note that requirements.txt exists and is a copy of web_requirements.txt.
+** This is requirement for hosting at [heroku](http://heroku.com), which
+mandates that Python applications have their requirements in a file called
+requirements.txt.
+
     3. Install svbtle_subscriber (optional)
 
         - pip install .
