@@ -181,24 +181,32 @@ def run_web():
     app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
 
     def allowed_file(filename):
+        """Return True if file has allowed extension (xml only)"""
+
         return '.' in filename and  filename.rsplit('.', 1)[1] in set(['xml'])
 
     @app.route('/')
     def home():
+        """homepage"""
+
         return render_template('index.html')
 
     @app.route('/all_available')
     def available():
+        """Show all available writers on svbtle.com"""
+
         writers = _get_writers(False)
         return render_template('subscriptions.html', writers=writers)
 
     @app.route('/missing_subscriptions', methods=['POST'])
     def missing():
-        missing_authors = []
-        file = request.files['file']
+        """Show missing author subscriptions based on uploaded file"""
 
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
+        missing_authors = []
+        file_obj = request.files['file']
+
+        if file_obj and allowed_file(file_obj.filename):
+            filename = secure_filename(file_obj.filename)
             xml = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
             writers = _get_writers(False)
