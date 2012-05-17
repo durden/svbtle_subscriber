@@ -27,3 +27,8 @@ thead {
 .footer {
     text-align: center;
 }
+
+.btn {
+    display: block;
+    margin-top: 20px;
+}
