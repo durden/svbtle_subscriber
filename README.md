@@ -65,8 +65,11 @@ requirements.txt.
 
 3. svbtle_subscriber.py --web
 
-    - Browse to 127.0.0.1
+    Browse to 127.0.0.1:5000
 
 ####Future
 
-- Web front-end
+- Error handling (too big of file, not xml file, unparseable, etc.)
+- Add subscribe link to missing
+- Cache users and their feed urls in db (or memory with memcached?)
+- Create app name on heroku for domain
