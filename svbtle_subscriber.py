@@ -86,15 +86,21 @@ def _get_greader_subscription_urls(xml_file):
     return feeds
 
 
-def _diff_subscriptions(existing_feed_urls, new_feed_urls):
+def _diff_subscriptions(existing_feed_urls, svbtle_authors):
     """
-    Diff two feed lists and return what feeds from new_feed_urls that aren't
+    Diff two feed lists and return what feeds from svbtle_authors that aren't
     already in existing_feed_urls
+
+    svbtle_authors is a list of dictionaries containing 'homepage', 'rss', and
+    'name' keys.
     """
 
-    missing_feeds = []
+    missing_authors = []
 
-    for feed in new_feed_urls:
+    for author in svbtle_authors:
+
+        feed = author['rss']
+
         # Feeds might have .rss or not in them, so check for both (we could use
         # set operations if it wasn't for this weirdness)
         possible_urls = [feed]
@@ -110,9 +116,9 @@ def _diff_subscriptions(existing_feed_urls, new_feed_urls):
                 break
 
         if not found:
-            missing_feeds.append(feed)
+            missing_authors.append(author)
 
-    return missing_feeds
+    return missing_authors
 
 
 def _parse_args():
@@ -167,15 +173,21 @@ def main():
 
     svbtle_feed_urls = []
     for writer in writers:
+
+        # FIXME: Could cache/db the list of authors and only do this request if
+        # we have added one.  This will reduce all most all the work.
+
         writer['rss'] = _get_writer_rss_address(writer['homepage'], verbose)
         svbtle_feed_urls.append(writer['rss'])
 
     _dump_results(writers)
 
     if reader_xml and os.path.isfile(reader_xml):
-        greader_feed_urls = _get_greader_subscription_urls(reader_xml)
-        print _diff_subscriptions(greader_feed_urls, svbtle_feed_urls)
+        greader_feed_urls = _get_greader_subscription_urls(xml_file=reader_xml)
+        missing_authors = _diff_subscriptions(greader_feed_urls, writers)
 
+        print '--- Missing authors ---'
+        _dump_results(missing_authors)
 
 if __name__ == "__main__":
     main()
