@@ -73,3 +73,4 @@ as:**
 - Error handling (too big of file, not xml file, unparseable, etc.)
 - Add subscribe link to missing
 - Cache users and their feed urls in db (or memory with memcached?)
+    - When app.debug don't use any db, just fetch/parse like CLI
