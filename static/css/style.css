@@ -1,5 +1,5 @@
 body {
-    font-family: Helvetica, sans-serif;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     text-align: left;
 }
 
@@ -26,4 +26,9 @@ thead {
 
 .footer {
     text-align: center;
+}
+
+.btn {
+    display: block;
+    margin-top: 20px;
 }
