@@ -2,34 +2,11 @@
 Little wrapper to kick off web interface
 """
 
-from __future__ import with_statement
-
-from contextlib import closing
 import os
-import sqlite3
-
-from flask import Flask, request, render_template, g
-
 import svbtle_subscriber as subscriber
+from flask import Flask, request, render_template
 
 app = Flask(__name__)
-app.debug = True
-
-# All uppercase variables loaded automatically below with from_object
-DATABASE = 'svbtle.db'
-MAX_CONTENT_LENGTH = 1 * 1024 * 1024
-
-app.config.from_object(__name__)
-
-
-@app.before_request
-def before_request():
-    g.db = connect_db()
-
-
-@app.teardown_request
-def teardown_request(exception):
-    g.db.close()
 
 
 def allowed_file(filename):
@@ -38,19 +15,11 @@ def allowed_file(filename):
     return '.' in filename and  filename.rsplit('.', 1)[1] in set(['xml'])
 
 
-def init_db():
-    with closing(connect_db()) as db:
-        with app.open_resource('schema.sql') as f:
-            db.cursor().executescript(f.read())
-        db.commit()
-
-
-def connect_db():
-    return sqlite3.connect(app.config['DATABASE'])
-
-
 def run_web(host, port):
     """Run web interface"""
+
+    app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
+    app.config['MAX_CONTENT_LENGTH'] = 1 * 1024 * 1024
 
     app.run(host=host, port=port)
 
@@ -66,39 +35,8 @@ def home():
 def available():
     """Show all available writers on svbtle.com"""
 
-    cur = g.db.execute("""select name, homepage_url, feed_url
-                          from svbtle_authors""")
-    writers = []
-
-    for row in cur.fetchall():
-        writers.append(dict(name=row[0], homepage=row[1], rss=row[2]))
-
-    return render_template('subscriptions.html', writers=writers)
-
-
-@app.route('/update')
-def update_authors():
     writers = subscriber.get_writers(False)
-
-    for writer in writers:
-        cur = g.db.execute('select name from svbtle_authors where name = ?',
-                            [writer['name']])
-
-        if len(cur.fetchall()):
-            g.db.execute("""
-                    update svbtle_authors set homepage_url = ?, feed_url = ?
-                    where name = ?""",
-                    [writer['homepage'], writer['rss'], writer['name']])
-            g.db.commit()
-            continue
-
-        g.db.execute("""
-                    insert into svbtle_authors (name, homepage_url, feed_url)
-                    values (?, ?, ?)""",
-                    [writer['name'], writer['homepage'], writer['rss']])
-        g.db.commit()
-
-    return 'Updated!'
+    return render_template('subscriptions.html', writers=writers)
 
 
 @app.route('/missing_subscriptions', methods=['POST'])

@@ -6,6 +6,7 @@ feed.
 """
 
 import os
+import cStringIO
 import re
 
 import requests
