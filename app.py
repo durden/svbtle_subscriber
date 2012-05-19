@@ -9,7 +9,7 @@ import urlparse
 
 import psycopg2
 
-from flask import Flask, request, render_template, g
+from flask import Flask, request, render_template, g, redirect, url_for
 
 import svbtle_subscriber as subscriber
 
@@ -36,17 +36,17 @@ def allowed_file(filename):
 
 
 def init_db():
-        db = connect_db()
-        db.cursor().execute("""
-            create table svbtle_authors (
-                id integer primary key,
-                name varchar,
-                homepage_url varchar,
-                feed_url varchar
-            );""")
-        db.commit()
-        db.cursor().close()
-        db.close()
+    db = connect_db()
+    db.cursor().execute("""
+        create table svbtle_authors (
+            id integer primary key,
+            name varchar,
+            homepage_url varchar,
+            feed_url varchar
+        );""")
+    db.commit()
+    db.cursor().close()
+    db.close()
 
 
 def connect_db():
@@ -117,7 +117,7 @@ def update_authors():
                     [writer['name'], writer['homepage'], writer['rss']])
         g.db_conn.commit()
 
-    return 'Updated!'
+    return redirect(url_for('available'))
 
 
 @app.route('/missing_subscriptions', methods=['POST'])
