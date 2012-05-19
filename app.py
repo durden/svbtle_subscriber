@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 Little wrapper to kick off web interface
 """
@@ -6,8 +8,6 @@ from __future__ import with_statement
 
 import os
 import urlparse
-
-import psycopg2
 
 from flask import Flask, request, render_template, g, redirect, url_for
 
@@ -58,6 +58,8 @@ def init_db():
 
 
 def connect_db():
+    import psycopg2
+
     url = urlparse.urlparse(os.environ['DATABASE_URL'])
     return psycopg2.connect(database=url.path[1:],
                             user=url.username, password=url.password,
