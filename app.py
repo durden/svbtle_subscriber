@@ -35,11 +35,19 @@ def allowed_file(filename):
     return '.' in filename and  filename.rsplit('.', 1)[1] in set(['xml'])
 
 
+def drop_db():
+    db = connect_db()
+    db.cursor().execute("drop table svbtle_authors;")
+    db.commit()
+    db.cursor().close()
+    db.close()
+
+
 def init_db():
     db = connect_db()
     db.cursor().execute("""
         create table svbtle_authors (
-            id integer primary key,
+            id serial,
             name varchar,
             homepage_url varchar,
             feed_url varchar
@@ -98,12 +106,6 @@ def update_db(db_conn=None):
         db_conn.commit()
 
 
-@app.route('/init')
-def init():
-    init_db()
-    return render_template('index.html')
-
-
 @app.route('/')
 def home():
     """homepage"""
@@ -151,6 +153,10 @@ if __name__ == '__main__':
 
     if "--update" in sys.argv:
         update_db()
+    elif "--init" in sys.argv:
+        init_db()
+    elif "--drop" in sys.argv:
+        drop_db()
     else:
         port = int(os.environ.get('PORT', 5000))
         run_web(host='0.0.0.0', port=port)
