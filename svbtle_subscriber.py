@@ -11,9 +11,6 @@ import re
 import requests
 from BeautifulSoup import BeautifulSoup, BeautifulStoneSoup
 
-import app
-
-
 def get_writers_and_homepage():
     """Get a list of dicts containing writer name and homepage addresses"""
 
@@ -124,23 +121,6 @@ def _dump_results(writers):
                               writer['rss'])
 
 
-def get_writer_rss_addresses(writers, verbose):
-    """
-    Fill in rss urls for given writers
-
-    More specifically fill in the 'rss' key for each writer dict in list of
-    writers
-    """
-
-    for writer in writers:
-
-        # FIXME: Could cache/db the list of authors and only do this request if
-        # we have added one.  This will reduce all most all the work.
-        writer['rss'] = get_writer_rss_address(writer['homepage'], verbose)
-
-    return writers
-
-
 def get_writers(verbose):
     """
     Get all available writers with their info
@@ -149,7 +129,9 @@ def get_writers(verbose):
     """
 
     writers = get_writers_and_homepage()
-    return get_writer_rss_addresses(writers, verbose)
+    for writer in writers:
+        writer['rss'] = get_writer_rss_address(writer['homepage'], verbose)
+        yield writer
 
 
 def _parse_args():
@@ -181,6 +163,7 @@ def main():
     verbose, reader_xml, web = _parse_args()
 
     if web:
+        import app
         app.run_web('127.0.0.1', 5000)
         return
 
