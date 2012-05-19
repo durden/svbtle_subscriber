@@ -68,9 +68,25 @@ as:**
 
     Browse to 127.0.0.1:5000
 
+#####Deploy
+
+I have this application deployed to to [heroku](http://heroku.com).  You'll
+need the free
+[postgres add-on](https://devcenter.heroku.com/articles/heroku-postgres-addon)
+and optionally the free
+[scheduler](https://devcenter.heroku.com/articles/scheduler) if you want to
+keep your database updated with new authors automatically.
+
+To deploy to [heroku](http://heroku.com):
+
+- heroku create --stack cedar
+- heroku addons:add shared-database
+- heroku addons:add scheduler:standard
+- git push heroku master
+
+
 #####Future
 
 - Error handling (too big of file, not xml file, unparseable, etc.)
 - Add subscribe link to missing
-- Cache users and their feed urls in db (or memory with memcached?)
-    - When app.debug don't use any db, just fetch/parse like CLI
+- Add debug mode for running web locally with sqlite or no db at all.
