@@ -20,12 +20,14 @@ app.debug = True
 
 @app.before_request
 def before_request():
-    g.db = connect_db()
+    g.db_conn = connect_db()
+    g.db_cursor = g.db_conn.cursor()
 
 
 @app.teardown_request
 def teardown_request(exception):
-    g.db.close()
+    g.db_cursor.close()
+    g.db_conn.close()
 
 
 def allowed_file(filename):
@@ -36,7 +38,7 @@ def allowed_file(filename):
 
 def init_db():
         db = connect_db()
-        db.execute("""
+        db.cursor().execute("""
             create table svbtle_authors (
                 id integer primary key,
                 name varchar,
@@ -44,6 +46,7 @@ def init_db():
                 feed_url varchar
             );""")
         db.commit()
+        db.cursor().close()
         db.close()
 
 
@@ -51,7 +54,7 @@ def connect_db():
     url = urlparse.urlparse(os.environ['DATABASE_URL'])
     return psycopg2.connect(database=url.path[1:],
                             user=url.username, password=url.password,
-                            host=url.hostname, port=url.port).cursor()
+                            host=url.hostname, port=url.port)
 
 
 def run_web(host, port):
@@ -61,11 +64,11 @@ def run_web(host, port):
 
 
 def get_db_writers():
-    cur = g.db.execute("""select name, homepage_url, feed_url
+    g.db_cursor.execute("""select name, homepage_url, feed_url
                           from svbtle_authors""")
     writers = []
 
-    for row in cur.fetchall():
+    for row in g.db_cursor.fetchall():
         writers.append(dict(name=row[0], homepage=row[1], rss=row[2]))
 
     return writers
@@ -97,22 +100,23 @@ def update_authors():
     writers = subscriber.get_writers(False)
 
     for writer in writers:
-        cur = g.db.execute('select name from svbtle_authors where name = %s'
+        cur = g.db_cursor.execute("""
+                            select name from svbtle_authors where name = %s""",
                             [writer['name']])
 
         if len(cur.fetchall()):
-            g.db.execute("""
+            g.db_cursor.execute("""
                     update svbtle_authors set homepage_url = %s, feed_url = %s
                     where name = %s""",
                     [writer['homepage'], writer['rss'], writer['name']])
-            g.db.commit()
+            g.db_conn.commit()
             continue
 
-        g.db.execute("""
+        g.db_cursor.execute("""
                     insert into svbtle_authors (name, homepage_url, feed_url)
                     values (%s, %s, %s)""",
                     [writer['name'], writer['homepage'], writer['rss']])
-        g.db.commit()
+        g.db_conn.commit()
 
     return 'Updated!'
 
