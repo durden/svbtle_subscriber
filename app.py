@@ -81,7 +81,7 @@ def get_db_writers():
     return writers
 
 
-def update_db(db_conn=None):
+def update_db(db_conn=None, verbose=True):
     if db_conn is None:
         db_conn = connect_db()
         db_cursor = db_conn.cursor()
@@ -97,6 +97,10 @@ def update_db(db_conn=None):
                     where name = %s""",
                     [writer['homepage'], writer['rss'], writer['name']])
             db_conn.commit()
+
+            if verbose:
+                subscriber._dump_results([writer])
+
             continue
 
         db_cursor.execute("""
@@ -105,12 +109,15 @@ def update_db(db_conn=None):
                     [writer['name'], writer['homepage'], writer['rss']])
         db_conn.commit()
 
+        if verbose:
+            subscriber._dump_results([writer])
+
 
 @app.route('/')
 def home():
     """homepage"""
 
-    update_db(g.db)
+    update_db(g.db, verbose=False)
     return render_template('index.html')
 
 
