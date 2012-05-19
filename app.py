@@ -35,10 +35,16 @@ def allowed_file(filename):
 
 
 def init_db():
-    with closing(connect_db()) as db:
-        with app.open_resource('schema.sql') as f:
-            db.cursor().executescript(f.read())
+        db = connect_db()
+        db.execute("""
+            create table svbtle_authors (
+                id integer primary key,
+                name varchar,
+                homepage_url varchar,
+                feed_url varchar
+            );""")
         db.commit()
+        db.close()
 
 
 def connect_db():
@@ -52,6 +58,7 @@ def run_web(host, port):
     """Run web interface"""
 
     app.run(host=host, port=port)
+
 
 def get_db_writers():
     cur = g.db.execute("""select name, homepage_url, feed_url
