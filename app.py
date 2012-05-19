@@ -73,25 +73,29 @@ def get_db_writers():
     return writers
 
 
-def update_db():
+def update_db(db_conn=None):
+    if db_conn is None:
+        db_conn = connect_db()
+        db_cursor = db_conn.cursor()
+
     for writer in subscriber.get_writers(False):
-        g.db_cursor.execute("""
+        db_cursor.execute("""
                             select name from svbtle_authors where name = %s""",
                             [writer['name']])
 
-        if len(g.db_cursor.fetchall()):
-            g.db_cursor.execute("""
+        if len(db_cursor.fetchall()):
+            db_cursor.execute("""
                     update svbtle_authors set homepage_url = %s, feed_url = %s
                     where name = %s""",
                     [writer['homepage'], writer['rss'], writer['name']])
-            g.db_conn.commit()
+            db_conn.commit()
             continue
 
-        g.db_cursor.execute("""
+        db_cursor.execute("""
                     insert into svbtle_authors (name, homepage_url, feed_url)
                     values (%s, %s, %s)""",
                     [writer['name'], writer['homepage'], writer['rss']])
-        g.db_conn.commit()
+        db_conn.commit()
 
 
 @app.route('/init')
@@ -104,7 +108,7 @@ def init():
 def home():
     """homepage"""
 
-    update_db()
+    update_db(g.db)
     return render_template('index.html')
 
 
