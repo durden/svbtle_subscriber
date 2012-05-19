@@ -4,7 +4,6 @@ Little wrapper to kick off web interface
 
 from __future__ import with_statement
 
-from contextlib import closing
 import os
 import urlparse
 
@@ -100,11 +99,11 @@ def update_authors():
     writers = subscriber.get_writers(False)
 
     for writer in writers:
-        cur = g.db_cursor.execute("""
+        g.db_cursor.execute("""
                             select name from svbtle_authors where name = %s""",
                             [writer['name']])
 
-        if len(cur.fetchall()):
+        if len(g.db_cursor.fetchall()):
             g.db_cursor.execute("""
                     update svbtle_authors set homepage_url = %s, feed_url = %s
                     where name = %s""",
