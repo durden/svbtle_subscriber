@@ -73,32 +73,8 @@ def get_db_writers():
     return writers
 
 
-@app.route('/init')
-def init():
-    init_db()
-    return render_template('index.html')
-
-
-@app.route('/')
-def home():
-    """homepage"""
-
-    return render_template('index.html')
-
-
-@app.route('/all')
-def available():
-    """Show all available writers on svbtle.com"""
-
-    writers = get_db_writers()
-    return render_template('subscriptions.html', writers=writers)
-
-
-@app.route('/update')
-def update_authors():
-    writers = subscriber.get_writers(False)
-
-    for writer in writers:
+def update_db():
+    for writer in subscriber.get_writers(False):
         g.db_cursor.execute("""
                             select name from svbtle_authors where name = %s""",
                             [writer['name']])
@@ -117,6 +93,31 @@ def update_authors():
                     [writer['name'], writer['homepage'], writer['rss']])
         g.db_conn.commit()
 
+
+@app.route('/init')
+def init():
+    init_db()
+    return render_template('index.html')
+
+
+@app.route('/')
+def home():
+    """homepage"""
+
+    update_db()
+    return render_template('index.html')
+
+
+@app.route('/all')
+def available():
+    """Show all available writers on svbtle.com"""
+
+    writers = get_db_writers()
+    return render_template('subscriptions.html', writers=writers)
+
+
+@app.route('/update')
+def update_authors():
     return redirect(url_for('available'))
 
 
@@ -142,6 +143,10 @@ def missing():
 
 
 if __name__ == '__main__':
-    # Bind to PORT if defined, otherwise default to 5000.
-    port = int(os.environ.get('PORT', 5000))
-    run_web(host='0.0.0.0', port=port)
+    import sys
+
+    if "--update" in sys.argv:
+        update_db()
+    else:
+        port = int(os.environ.get('PORT', 5000))
+        run_web(host='0.0.0.0', port=port)
