@@ -117,7 +117,6 @@ def update_db(db_conn=None, verbose=True):
 def home():
     """homepage"""
 
-    update_db(g.db, verbose=False)
     return render_template('index.html')
 
 
