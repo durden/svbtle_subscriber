@@ -6,7 +6,9 @@ from __future__ import with_statement
 
 from contextlib import closing
 import os
-import sqlite3
+import urlparse
+
+import psycopg2
 
 from flask import Flask, request, render_template, g
 
@@ -14,12 +16,6 @@ import svbtle_subscriber as subscriber
 
 app = Flask(__name__)
 app.debug = True
-
-# All uppercase variables loaded automatically below with from_object
-DATABASE = 'svbtle.db'
-MAX_CONTENT_LENGTH = 1 * 1024 * 1024
-
-app.config.from_object(__name__)
 
 
 @app.before_request
@@ -46,13 +42,26 @@ def init_db():
 
 
 def connect_db():
-    return sqlite3.connect(app.config['DATABASE'])
+    url = urlparse.urlparse(os.environ['DATABASE_URL'])
+    return psycopg2.connect(database=url.path[1:],
+                            user=url.username, password=url.password,
+                            host=url.hostname, port=url.port).cursor()
 
 
 def run_web(host, port):
     """Run web interface"""
 
     app.run(host=host, port=port)
+
+def get_db_writers():
+    cur = g.db.execute("""select name, homepage_url, feed_url
+                          from svbtle_authors""")
+    writers = []
+
+    for row in cur.fetchall():
+        writers.append(dict(name=row[0], homepage=row[1], rss=row[2]))
+
+    return writers
 
 
 @app.route('/')
@@ -66,13 +75,7 @@ def home():
 def available():
     """Show all available writers on svbtle.com"""
 
-    cur = g.db.execute("""select name, homepage_url, feed_url
-                          from svbtle_authors""")
-    writers = []
-
-    for row in cur.fetchall():
-        writers.append(dict(name=row[0], homepage=row[1], rss=row[2]))
-
+    writers = get_db_writers()
     return render_template('subscriptions.html', writers=writers)
 
 
@@ -81,20 +84,20 @@ def update_authors():
     writers = subscriber.get_writers(False)
 
     for writer in writers:
-        cur = g.db.execute('select name from svbtle_authors where name = ?',
+        cur = g.db.execute('select name from svbtle_authors where name = %s'
                             [writer['name']])
 
         if len(cur.fetchall()):
             g.db.execute("""
-                    update svbtle_authors set homepage_url = ?, feed_url = ?
-                    where name = ?""",
+                    update svbtle_authors set homepage_url = %s, feed_url = %s
+                    where name = %s""",
                     [writer['homepage'], writer['rss'], writer['name']])
             g.db.commit()
             continue
 
         g.db.execute("""
                     insert into svbtle_authors (name, homepage_url, feed_url)
-                    values (?, ?, ?)""",
+                    values (%s, %s, %s)""",
                     [writer['name'], writer['homepage'], writer['rss']])
         g.db.commit()
 
@@ -109,7 +112,7 @@ def missing():
     file_obj = request.files['reader_xml']
 
     if file_obj and allowed_file(file_obj.filename):
-        writers = subscriber.get_writers(False)
+        writers = get_db_writers()
 
         greader_feed_urls = subscriber.get_greader_subscription_urls(
                                                                 file_obj)
