@@ -64,6 +64,12 @@ def get_db_writers():
     return writers
 
 
+@app.route('/init')
+def init():
+    init_db()
+    return render_template('index.html')
+
+
 @app.route('/')
 def home():
     """homepage"""
