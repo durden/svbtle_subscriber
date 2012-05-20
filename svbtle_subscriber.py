@@ -55,15 +55,24 @@ def get_writer_rss_address(url, verbose=True):
     return rss
 
 
-def get_greader_subscription_urls(xml=None):
+def get_greader_subscription_urls(xml=None, url=None):
     """Get a list of feed urls from your greader account based on xml file"""
 
-    if os.path.isfile(str(xml)):
-        soup = BeautifulStoneSoup(open(xml).read())
-    elif hasattr(xml, 'read'):
-        soup = BeautifulStoneSoup(xml.read())
+    if url is not None:
+        xml = requests.get(url)
+        if xml.status_code != 200:
+            return []
+
+        soup = BeautifulSoup(xml.content)
+    elif xml is not None:
+        if os.path.isfile(str(xml)):
+            soup = BeautifulStoneSoup(open(xml).read())
+        elif hasattr(xml, 'read'):
+            soup = BeautifulStoneSoup(xml.read())
+
+        raise TypeError('xml must be file or object with read()')
     else:
-        raise TypeError('xml argument is not a file and cannot use read()')
+        raise TypeError('xml or url must be specified')
 
     feeds = []
     xml_soup = soup.findAll('string', {'name': 'id'})

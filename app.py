@@ -135,22 +135,27 @@ def update_authors():
     return redirect(url_for('available'))
 
 
-@app.route('/missing_subscriptions', methods=['POST'])
+@app.route('/missing_subscriptions', methods=['POST', 'GET'])
 def missing():
     """Show missing author subscriptions based on uploaded file"""
 
     missing_authors = []
-    file_obj = request.files['reader_xml']
+    greader_feed_urls = []
 
-    if file_obj and allowed_file(file_obj.filename):
-        writers = get_db_writers()
+    writers = get_db_writers()
 
-        greader_feed_urls = subscriber.get_greader_subscription_urls(
-                                                                file_obj)
-        if greader_feed_urls:
-            missing_authors = subscriber.diff_subscriptions(
-                                                        greader_feed_urls,
-                                                        writers)
+    if not request.files or request.method == 'GET':
+        url = 'http://www.google.com/reader/api/0/subscription/list'
+        greader_feed_urls = subscriber.get_greader_subscription_urls(url=url)
+    else:
+        file_obj = request.files['reader_xml']
+        if file_obj and allowed_file(file_obj.filename):
+            greader_feed_urls = subscriber.get_greader_subscription_urls(
+                                                                xml=file_obj)
+    if len(greader_feed_urls):
+        missing_authors = subscriber.diff_subscriptions(
+                                                    greader_feed_urls,
+                                                    writers)
 
     return render_template('subscriptions.html', writers=missing_authors,
                             heading='Missing Svbtle Authors')
