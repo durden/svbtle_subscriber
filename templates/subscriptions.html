@@ -9,8 +9,9 @@
         <tr>
             <th>Name</th>
             <th>Homepage</th>
-            <th>Feed</th>
             <th>Twitter</th>
+            <th>Subscribe</th>
+            <th>Feed</th>
         </tr>
     </thead>
     <tbody>
@@ -18,9 +19,9 @@
             <tr>
                 <td>{{ writer.name }}</td>
                 <td><a href="{{ writer.homepage }}">{{ writer.homepage }}</a></td>
-                <td><a href="{{ writer.rss }}">{{ writer.rss }}</a></td>
-                <td><a href="{{ writer.subscribe_url }}">subscribe</a></td>
                 <td><a href="{{ writer.twitter_url }}">{{ writer.twitter_username }}</a></td>
+                <td><a href="{{ writer.subscribe_url }}">subscribe</a></td>
+                <td><a href="{{ writer.rss }}">{{ writer.rss }}</a></td>
             </tr>
         {% else %}
             <p>
