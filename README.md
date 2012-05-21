@@ -94,6 +94,5 @@ populating your database:
 #####Future
 
 - Error handling (too big of file, not xml file, unparseable, etc.)
-- Add subscribe link to missing
 - Add debug mode for running web locally with sqlite or no db at all.
 - Remove file upload and just let user login and hit the url

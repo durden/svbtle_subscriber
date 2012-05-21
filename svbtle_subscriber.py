@@ -74,8 +74,8 @@ def get_greader_subscription_urls(xml=None, url=None):
             soup = BeautifulStoneSoup(open(xml).read())
         elif hasattr(xml, 'read'):
             soup = BeautifulStoneSoup(xml.read())
-
-        raise TypeError('xml must be file or object with read()')
+        else:
+            raise TypeError('xml must be file or object with read()')
     else:
         raise TypeError('xml or url must be specified')
 
