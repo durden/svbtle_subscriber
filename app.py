@@ -50,7 +50,8 @@ def init_db():
             id serial,
             name varchar,
             homepage_url varchar,
-            feed_url varchar
+            feed_url varchar,
+            twitter_username varchar
         );""")
     db.commit()
     db.cursor().close()
@@ -73,12 +74,15 @@ def run_web(host, port):
 
 
 def get_db_writers():
-    g.db_cursor.execute("""select name, homepage_url, feed_url
+    g.db_cursor.execute("""select name, homepage_url, feed_url,
+                            twitter_username
                           from svbtle_authors""")
     writers = []
 
     for row in g.db_cursor.fetchall():
-        writers.append(dict(name=row[0], homepage=row[1], rss=row[2]))
+        twitter_url = 'http://twitter.com/%s' % (row[3].split('@a')[1])
+        writers.append(dict(name=row[0], homepage=row[1], rss=row[2],
+                            twitter_url=twitter_url, twitter_username=row[3]))
 
     return writers
 
@@ -95,9 +99,11 @@ def update_db(db_conn=None, verbose=True):
 
         if len(db_cursor.fetchall()):
             db_cursor.execute("""
-                    update svbtle_authors set homepage_url = %s, feed_url = %s
+                    update svbtle_authors set homepage_url = %s, feed_url = %s,
+                    twitter_username = %s
                     where name = %s""",
-                    [writer['homepage'], writer['rss'], writer['name']])
+                    [writer['homepage'], writer['rss'], writer['twitter'],
+                     writer['name']])
             db_conn.commit()
 
             if verbose:
@@ -106,9 +112,11 @@ def update_db(db_conn=None, verbose=True):
             continue
 
         db_cursor.execute("""
-                    insert into svbtle_authors (name, homepage_url, feed_url)
-                    values (%s, %s, %s)""",
-                    [writer['name'], writer['homepage'], writer['rss']])
+                    insert into svbtle_authors (name, homepage_url, feed_url,
+                                                twitter_username)
+                    values (%s, %s, %s, %s)""",
+                    [writer['name'], writer['homepage'], writer['rss'],
+                     writer['twitter']])
         db_conn.commit()
 
         if verbose:

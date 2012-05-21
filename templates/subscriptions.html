@@ -10,6 +10,7 @@
             <th>Name</th>
             <th>Homepage</th>
             <th>Feed</th>
+            <th>Twitter</th>
         </tr>
     </thead>
     <tbody>
@@ -18,6 +19,7 @@
                 <td>{{ writer.name }}</td>
                 <td><a href="{{ writer.homepage }}">{{ writer.homepage }}</a></td>
                 <td><a href="{{ writer.rss }}">{{ writer.rss }}</a></td>
+                <td><a href="{{ writer.twitter_url }}">{{ writer.twitter_username }}</a></td>
             </tr>
         {% else %}
             <p>

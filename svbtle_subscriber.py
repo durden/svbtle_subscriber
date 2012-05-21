@@ -38,11 +38,11 @@ def get_writers_and_homepage():
     return writers
 
 
-def get_writer_rss_address(url, verbose=True):
-    """Scrape given url for a feed address and return it"""
+def get_writer_info(url, verbose=True):
+    """Scrape given url for a feed address and twitter address"""
 
     if verbose:
-        print 'Fetching rss url from: %s\r' % (url)
+        print 'Fetching info from: %s\r' % (url)
 
     html = requests.get(url)
     soup = BeautifulSoup(html.content)
@@ -52,7 +52,12 @@ def get_writer_rss_address(url, verbose=True):
     except (KeyError, TypeError):
         rss = ''
 
-    return rss
+    try:
+        twitter = soup.find('li', {'class': 'twitter'}).text
+    except AttributeError:
+        twitter = ''
+
+    return (rss, twitter)
 
 
 def get_greader_subscription_urls(xml=None, url=None):
@@ -126,8 +131,8 @@ def _dump_results(writers):
     """Dump list of writer tuples to stdout"""
 
     for writer in writers:
-        print '%s, %s, %s' % (writer['name'], writer['homepage'],
-                              writer['rss'])
+        print '%s, %s, %s, %s' % (writer['name'], writer['homepage'],
+                                    writer['rss'], writer['twitter'])
 
 
 def get_writers(verbose):
@@ -139,7 +144,8 @@ def get_writers(verbose):
 
     writers = get_writers_and_homepage()
     for writer in writers:
-        writer['rss'] = get_writer_rss_address(writer['homepage'], verbose)
+        writer['rss'], writer['twitter'] = get_writer_info(
+                                                writer['homepage'], verbose)
         yield writer
 
 
