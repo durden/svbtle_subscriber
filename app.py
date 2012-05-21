@@ -80,7 +80,13 @@ def get_db_writers():
     writers = []
 
     for row in g.db_cursor.fetchall():
-        twitter_url = 'http://twitter.com/%s' % (row[3])
+
+        # User might not have twitter account
+        try:
+            twitter_url = 'http://twitter.com/%s' % (row[3].split('@')[1])
+        except IndexError:
+            twitter_url = ''
+
         writers.append(dict(name=row[0], homepage=row[1], rss=row[2],
                             twitter_url=twitter_url, twitter_username=row[3]))
 
