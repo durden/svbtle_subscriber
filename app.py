@@ -78,6 +78,7 @@ def get_db_writers():
                             twitter_username
                           from svbtle_authors""")
     writers = []
+    subscribe_url = 'http://www.google.com/ig/add?feedurl=%s'
 
     for row in g.db_cursor.fetchall():
 
@@ -88,7 +89,8 @@ def get_db_writers():
             twitter_url = ''
 
         writers.append(dict(name=row[0], homepage=row[1], rss=row[2],
-                            twitter_url=twitter_url, twitter_username=row[3]))
+                            twitter_url=twitter_url, twitter_username=row[3],
+                            subscribe_url=subscribe_url % (row[2])))
 
     return writers
 
