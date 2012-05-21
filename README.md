@@ -84,6 +84,12 @@ To deploy to [heroku](http://heroku.com):
 - heroku addons:add scheduler:standard
 - git push heroku master
 
+The following workers/one-off processes are available for creating and
+populating your database:
+
+- heroku run db_worker --init
+- heroku run db_worker --update
+- heroku run db_worker --drop
 
 #####Future
 
