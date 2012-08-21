@@ -48,7 +48,7 @@ def get_writer_info(url, verbose=True):
     soup = BeautifulSoup(html.content)
 
     try:
-        rss = soup.find('link', {'title': 'RSS'})['href']
+        rss = soup.find('link', {'type': re.compile(r'.*rss.*')})['href']
     except (KeyError, TypeError):
         rss = ''
 
