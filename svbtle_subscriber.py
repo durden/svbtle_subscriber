@@ -18,12 +18,12 @@ def get_writers_and_homepage():
     soup = BeautifulSoup(html.content)
 
     writer_soup = soup.findAll('li',
-                               {'class': re.compile(r'.*post clearfix.*')})
+                               {'class': re.compile(r'.*clearfix .*')})
 
     writers = []
     for writer in writer_soup:
         try:
-            name = writer.find('p', {'class': 'title'}).text
+            name = writer.find('h3', {'class': 'user'}).text
         except AttributeError:
             name = 'n/a'
 
