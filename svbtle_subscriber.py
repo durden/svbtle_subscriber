@@ -14,7 +14,11 @@ from BeautifulSoup import BeautifulSoup, BeautifulStoneSoup
 def get_writers_and_homepage():
     """Get a list of dicts containing writer name and homepage addresses"""
 
-    html = requests.get('http://svbtle.com/')
+    try:
+        html = requests.get('http://svbtle.com/')
+    except requests.exceptions.RequestException:
+        return 'n/a'
+
     soup = BeautifulSoup(html.content)
 
     writer_soup = soup.findAll('li',
@@ -44,7 +48,11 @@ def get_writer_info(url, verbose=True):
     if verbose:
         print 'Fetching info from: %s\r' % (url)
 
-    html = requests.get(url)
+    try:
+        html = requests.get(url)
+    except requests.exceptions.RequestException:
+        return ('', '')
+
     soup = BeautifulSoup(html.content)
 
     try:
@@ -64,7 +72,11 @@ def get_greader_subscription_urls(xml=None, url=None):
     """Get a list of feed urls from your greader account based on xml file"""
 
     if url is not None:
-        xml = requests.get(url)
+        try:
+            xml = requests.get(url)
+        except requests.exceptions.RequestException:
+            return []
+
         if xml.status_code != 200:
             return []
 
