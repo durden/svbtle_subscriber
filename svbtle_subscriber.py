@@ -31,13 +31,14 @@ def get_writers_and_homepage():
         except AttributeError:
             name = 'n/a'
 
-        homepage = re.search(r'.*href="(.*)" ', str(writer))
-        try:
-            homepage = homepage.group(1)
-        except AttributeError:
-            homepage = 'n/a'
+        if writer.find('a', {'class': 'user_link clearfix'}):
+            homepage = re.search(r'.*href="(.*)" ', str(writer))
+            try:
+                homepage = homepage.group(1)
+            except AttributeError:
+                homepage = 'n/a'
 
-        writers.append({'name': name, 'homepage': homepage})
+            writers.append({'name': name, 'homepage': homepage})
 
     return writers
 
