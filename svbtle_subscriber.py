@@ -48,12 +48,12 @@ def get_writer_info(url, verbose=True):
     soup = BeautifulSoup(html.content)
 
     try:
-        rss = soup.find('link', {'type': re.compile(r'.*rss.*')})['href']
+        rss = soup.find('li', {'class': 'link feed'}).findChild('a')['href']
     except (KeyError, TypeError):
         rss = ''
 
     try:
-        twitter = soup.find('li', {'class': 'twitter'}).text
+        twitter = soup.find('li', {'class': 'link twitter'}).text
     except AttributeError:
         twitter = ''
 
